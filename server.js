@@ -2,21 +2,22 @@ const express = require('express');
 const router = express.Router;
 const mongojs = require("mongojs");
 const bcrypt = require('bcrypt');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 const saltRounds = 10;
 const app = express();
 let users;
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://alexAdmin:7osNUzxyfSZ9ia9H@boilerapplication-gaw0n.mongodb.net/test?retryWrites=true";
-MongoClient.connect( uri, { useNewUrlParser: true }, (err, client) => {
+const uri = "mongodb://michaelel1411:Misha2661748@ds155916.mlab.com:55916/boil_app";
+const client = new MongoClient( uri, { useNewUrlParser: true });
+client.connect((err, dbclient) => {
     console.log('DB Connected...');
-    console.log(client);
+    console.log(dbclient);
     if(err) {
         console.log('Error occurred while connecting to MongoDB Atlas...\n',err);
     }
     console.log('DB Connected...');
-    users = client.db("boilerAppDB").collection("ba_users");
+    users = dbclient.db("boilerAppDB").collection("ba_users");
     console.log(users);
     // perform actions on the collection object
     client.close();
