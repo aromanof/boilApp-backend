@@ -1,27 +1,26 @@
 const express = require('express');
-const router = express.Router;
-const mongojs = require("mongojs");
-const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const app = express();
-let users;
-const uri = "mongodb://AlexAdmin:AlexAdmin1@ds155916.mlab.com:55916/boil_app";
-let db = mongojs(uri, ['ba_users']);
+const helpers = require('./helpers');
 
-// const MongoClient = require('mongodb').MongoClient;
-// MongoClient.connect(uri, { useNewUrlParser: true }, function(err, client) {
-//     console.log('DB Connected...');
-//     console.log(client);
-//     if(err) {
-//         console.log('Error occurred while connecting to MongoDB Atlas...\n',err);
-//     }
-//     console.log('DB Connected...');
-//     users = client.db("boilerAppDB").collection("ba_users");
-//     console.log(users);
-//     // perform actions on the collection object
-//     client.close();
-// });
+const app = express();
+var db;
+
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://admin:admin@boiler-calculations-db-jxkq1.mongodb.net/test?retryWrites=true&w=majority";
+
+
+const client = new MongoClient(uri, { useNewUrlParser: true });
+client.connect(err => {
+    if (err) {
+        return console.log(err);
+    }
+    app.listen(8000, () => {
+        console.log('Server started!');
+        db = client.db("boil_app_db");
+    });
+});
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -29,34 +28,49 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.route('/api/login').get((req, res) => {
-    console.log('Inside GET /login callback function');
-    res.send(`You got the login page!\n`);
-});
+app.get('/', (err, res) => {
+    res.send('My API started');
+})
 
-app.route('/api/login').post((req, res) => {
-    console.log('inside login post');
-    db.ba_users.find( (err, tasks) => res.send(tasks));
-    // if(!req.body) return res.sendStatus(400);
-    // res.send(`password checked`);
-});
-
-app.post('/login', bodyParser.json(), (req, res) => {
-    console.log('inside login post');
-    // if(!req.body) return res.sendStatus(400);
-    // bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-    //     const loginSuccessful = users.find(user => user.login === req.body.login && user.hashed_password === hash);
-    //     res.send(loginSuccessful);
-    // });
-    db.ba_users.find( (err, tasks) => res.send(tasks));
-});
-
-app.route('/api/cats').get((req, res) => {
-    res.send({
-      cats: [{ name: 'lilly' }, { name: 'lucy' }]
+app.post('/user/create', bodyParser.json(), (req, res) => {
+    console.log('inside registration post');
+    bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+        if (err) throw err;
+        const client = {
+            login: req.body.login,
+            hashedPass: hash,
+        }
+        db.collection("users").insertOne(client);
+        res.send('Client created');
     });
 });
 
-app.listen(8000, () => {
-    console.log('Server started!');
+app.post('/user/login', bodyParser.json(), (req, res) => {
+    console.log('inside login post');
+    console.log(req.body.login);
+    if(!req.body) return res.sendStatus(400);
+    db.collection('users').findOne({ login: req.body.login })
+        .then(function (user) {
+         console.log(user);
+         if (!user) {
+            res.send(null);
+         } else {
+            bcrypt.compare(req.body.password, user.hashedPass, function (err, result) {
+            console.log(result);
+            console.log(req.body.password);
+            console.log(user.password);
+            if (result == true) {
+                res.send({
+                    isValid: true,
+                });
+            } else {
+                res.send({
+                    isValid: false,
+                });
+            }
+          });
+        }
+  });
 });
+
+
