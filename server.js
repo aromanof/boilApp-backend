@@ -3,11 +3,11 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const helpers = require('./helpers');
-
+const mongo = require('mongodb');
+const MongoClient = mongo.MongoClient;
 const app = express();
 var db;
 
-const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://admin:admin@boiler-calculations-db-jxkq1.mongodb.net/test?retryWrites=true&w=majority";
 
 
@@ -39,9 +39,14 @@ app.post('/user/create', bodyParser.json(), (req, res) => {
         const client = {
             login: req.body.login,
             hashedPass: hash,
+        };
+        const alreadyExists = !!db.collection("users").findOne({login: req.body.login});
+        if (alreadyExists) {
+            res.status(400).send({message: 'User already exists'});
+        } else {
+            db.collection("users").insertOne(client);
+            res.send(200);
         }
-        db.collection("users").insertOne(client);
-        res.send('Client created');
     });
 });
 
@@ -52,25 +57,59 @@ app.post('/user/login', bodyParser.json(), (req, res) => {
     db.collection('users').findOne({ login: req.body.login })
         .then(function (user) {
          console.log(user);
+         console.log(typeof user._id);
          if (!user) {
-            res.send(null);
+             res.status(404).send({message: 'User with such login is not found'});
          } else {
             bcrypt.compare(req.body.password, user.hashedPass, function (err, result) {
-            console.log(result);
-            console.log(req.body.password);
-            console.log(user.password);
             if (result == true) {
-                res.send({
+                const jwtBearerToken = helpers.getJWTByUserId(`${user._id}`);
+                console.log(jwtBearerToken);
+                res.status(200).send({
                     isValid: true,
+                    token: jwtBearerToken,
                 });
             } else {
-                res.send({
+                res.status(200).send({
                     isValid: false,
                 });
             }
           });
         }
   });
+});
+
+// todo: fix verification (id comparison)
+app.post('/user/verifyToken', bodyParser.json(), (req, res) => {
+    console.log('inside verifyToken');
+    console.log(req.body.token);
+    if(!req.body) return res.sendStatus(400);
+    const userId = +helpers.verifyJWT(req.body.token);
+    console.log('userId');
+    console.log(typeof userId);
+    console.log(userId);
+    mongoId = new mongo.ObjectID(+userId);
+    mongoIdTest = new ObjectID(+userId);
+    console.log('mongoId');
+    console.log(mongoId);
+    console.log(typeof mongoId);
+    console.log('mongoIdTest');
+    console.log(mongoIdTest);
+    console.log(typeof mongoIdTest);
+    db.collection('users').findOne({ _id: mongoId })
+        .then(function (user) {
+            console.log(user);
+            if (!user) {
+                res.status(200).send({
+                    tokenValid: false,
+                })
+            } else {
+                res.status(200).send({
+                    tokenValid: true,
+                    userName: user.login,
+                })
+            }
+        });
 });
 
 
