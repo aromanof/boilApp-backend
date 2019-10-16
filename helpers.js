@@ -10,8 +10,8 @@ var exports = module.exports = {};
 exports.getJWTByUserId = (userId) => {
     return jwt.sign({}, RSA_PRIVATE_KEY, {
         algorithm: 'RS256',
-        expiresIn: 120,
-        subject: userId
+        expiresIn: "7d",
+        subject: userId,
     });
 }
 

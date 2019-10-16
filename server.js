@@ -62,12 +62,17 @@ app.post('/user/login', bodyParser.json(), (req, res) => {
              res.status(404).send({message: 'User with such login is not found'});
          } else {
             bcrypt.compare(req.body.password, user.hashedPass, function (err, result) {
-            if (result == true) {
+            if (result) {
                 const jwtBearerToken = helpers.getJWTByUserId(`${user._id}`);
                 console.log(jwtBearerToken);
                 res.status(200).send({
                     isValid: true,
                     token: jwtBearerToken,
+                    user: {
+                        name: user.name,
+                        email: user.email,
+                        login: user.login,
+                    },
                 });
             } else {
                 res.status(200).send({
@@ -84,19 +89,8 @@ app.post('/user/verifyToken', bodyParser.json(), (req, res) => {
     console.log('inside verifyToken');
     console.log(req.body.token);
     if(!req.body) return res.sendStatus(400);
-    const userId = +helpers.verifyJWT(req.body.token);
-    console.log('userId');
-    console.log(typeof userId);
-    console.log(userId);
-    mongoId = new mongo.ObjectID(+userId);
-    mongoIdTest = new ObjectID(+userId);
-    console.log('mongoId');
-    console.log(mongoId);
-    console.log(typeof mongoId);
-    console.log('mongoIdTest');
-    console.log(mongoIdTest);
-    console.log(typeof mongoIdTest);
-    db.collection('users').findOne({ _id: mongoId })
+    const userId = helpers.verifyJWT(req.body.token);
+    db.collection('users').findOne({"_id" : mongo.ObjectID(userId)})
         .then(function (user) {
             console.log(user);
             if (!user) {
