@@ -39,14 +39,23 @@ app.post('/user/create', bodyParser.json(), (req, res) => {
         const client = {
             login: req.body.login,
             hashedPass: hash,
+            name: req.body.name,
+            email: req.body.email,
         };
-        const alreadyExists = !!db.collection("users").findOne({login: req.body.login});
-        if (alreadyExists) {
-            res.status(400).send({message: 'User already exists'});
-        } else {
-            db.collection("users").insertOne(client);
-            res.send(200);
-        }
+        db.collection("users").findOne({login: req.body.login}).then((user) => {
+            console.log(user);
+            if (user) {
+                res.status(400).send({message: 'User already exists'});
+            } else {
+                db.collection("users").insertOne(client);
+                res.sendStatus(200);
+            }
+        });
+        // if (alreadyExists) {
+        // } else {
+        //     db.collection("users").insertOne(client);
+        //     res.send(200);
+        // }
     });
 });
 
