@@ -74,6 +74,7 @@ app.post('/user/login', bodyParser.json(), (req, res) => {
                         name: user.name,
                         email: user.email,
                         login: user.login,
+                        roles: user.roles || [1],
                     },
                 });
             } else {
@@ -100,7 +101,12 @@ app.post('/user/verifyToken', bodyParser.json(), (req, res) => {
             } else {
                 res.status(200).send({
                     tokenValid: true,
-                    userName: user.login,
+                    user: {
+                        name: user.name,
+                        email: user.email,
+                        login: user.login,
+                        roles: user.roles || [1],
+                    },
                 })
             }
         });
@@ -136,7 +142,7 @@ app.post('/calculations/coefficients3', bodyParser.json(), (req, res) => {
 
 app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
-    db.collection('constants').findOne()
+    db.collection('constants').findOne({taskNum: 1})
         .then(coefs => {
             if (!coefs) {
                 res.status(404).send({
@@ -240,4 +246,70 @@ app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
         sChangingList,
         resultNozzleHeightList,
     });
+});
+
+app.post('/admin/disable-task1', bodyParser.json(), (req, res) => {
+    db.collection('constants').findOne({taskNum: 1})
+        .then(coefs => {
+            if (!coefs) {
+                res.status(404).send({
+                    message: 'Something went wrong, try again later',
+                });
+            } else {
+                db.collection('constants')
+                    .updateOne({taskNum: 1}, {$set: {disableInput: req.body.isDisabled}});
+                res.status(200).send();
+            }
+        });
+});
+
+app.post('/admin/disable-task3', bodyParser.json(), (req, res) => {
+    db.collection('constants').findOne({taskNum: 3})
+        .then(coefs => {
+            if (!coefs) {
+                res.status(404).send({
+                    message: 'Something went wrong, try again later',
+                });
+            } else {
+                db.collection('constants')
+                    .updateOne({taskNum: 3}, {$set: {disableInput: req.body.isDisabled}});
+                res.status(200).send();
+            }
+        });
+});
+
+app.post('/admin/update-task1', bodyParser.json(), (req, res) => {
+    if(!req.body) return res.sendStatus(400);
+    db.collection('constants').updateOne({taskNum: 1},
+        {
+            $set: {
+                G1: req.body.G1,
+                G2: req.body.G2,
+                T1: req.body.T1,
+                T2: req.body.T2,
+                Phi1: req.body.Phi1,
+                Phi2: req.body.Phi2,
+            }
+        }
+    );
+    res.status(200).send();
+});
+
+app.post('/admin/update-task3', bodyParser.json(), (req, res) => {
+    if(!req.body) return res.sendStatus(400);
+    db.collection('constants').updateOne({taskNum: 3},
+        {
+            $set: {
+                  T2_1: req.body.T2_1,
+                  T2_2: req.body.T2_2,
+                  I1: req.body.I1,
+                  I2: req.body.I2,
+                  L: req.body.L,
+                  S: req.body.S,
+                  V: req.body.V,
+                  d: req.body.d,
+            }
+        }
+    );
+    res.status(200).send();
 });
