@@ -30,7 +30,7 @@ app.use(function(req, res, next) {
 
 app.get('/', (err, res) => {
     res.send('My API started');
-})
+});
 
 app.post('/user/create', bodyParser.json(), (req, res) => {
     bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
@@ -49,11 +49,6 @@ app.post('/user/create', bodyParser.json(), (req, res) => {
                 res.sendStatus(200);
             }
         });
-        // if (alreadyExists) {
-        // } else {
-        //     db.collection("users").insertOne(client);
-        //     res.send(200);
-        // }
     });
 });
 
@@ -89,7 +84,6 @@ app.post('/user/login', bodyParser.json(), (req, res) => {
 
 // todo: fix verification (id comparison)
 app.post('/user/verifyToken', bodyParser.json(), (req, res) => {
-    console.log('inside verifyToken');
     if(!req.body) return res.sendStatus(400);
     const userId = helpers.verifyJWT(req.body.token);
     db.collection('users').findOne({"_id" : mongo.ObjectID(userId)})
@@ -171,8 +165,6 @@ app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
 app.post('/chart/task1-temperature', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
     const n = helpers.getN(req.body.G1, req.body.G2);
-    console.log('inside chart');
-    console.log(req.body);
     const startTemperatureList = [
         +req.body.T1 - 20,
         +req.body.T1 - 10,
@@ -221,7 +213,6 @@ app.post('/calculations/calculate-task3', bodyParser.json(), (req, res) => {
 
 app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
-    console.log('inside chart nozzle');
     const sChangingList = [
         +req.body.S - 20,
         +req.body.S - 10,
