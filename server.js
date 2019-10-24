@@ -46,7 +46,7 @@ app.post('/user/create', bodyParser.json(), (req, res) => {
                 res.status(400).send({message: 'User already exists'});
             } else {
                 db.collection("users").insertOne(client);
-                res.sendStatus(200);
+                res.status(200).send();
             }
         });
     });
@@ -173,11 +173,11 @@ app.post('/chart/task1-temperature', bodyParser.json(), (req, res) => {
         +req.body.T1 + 20
     ];
     const endTemperatureList = [
+        +req.body.T2 - 5,
         +req.body.T2,
-        +req.body.T2,
-        +req.body.T2,
-        +req.body.T2,
-        +req.body.T2,
+        +req.body.T2 + 5,
+        +req.body.T2 + 10,
+        +req.body.T2 + 15,
     ];
     const resultTemperatureList = [];
     for (let i = 0; i < startTemperatureList.length; i++) {

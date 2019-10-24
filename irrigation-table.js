@@ -36,7 +36,7 @@ exports.getIrrigationValue = (Hw) => {
             return 3.8;
             break;
         default:
-            return null;
+            return 5;
             break;
     }
 };
