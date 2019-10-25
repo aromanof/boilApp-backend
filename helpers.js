@@ -19,14 +19,9 @@ const v = 1.16;
 const w = 1.5;
 
 const prandalCryteria = 0.68;
-const volumeSteamConsistensionForAverage = 0.112;
-const volumeAirConsistensionForAverage = 0.878;
-
 // Taverage = 102, Tj = 20
 const averageSteamConcentration = 0.035
-
 const skrubberDeltaT = 54;
-
 const cinematicViscosity = MuVl / RoVl;
 
 var exports = module.exports = {};

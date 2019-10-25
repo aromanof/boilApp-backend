@@ -8,7 +8,8 @@ const MongoClient = mongo.MongoClient;
 const app = express();
 var db;
 
-const uri = "mongodb+srv://admin:admin@boiler-calculations-db-jxkq1.mongodb.net/test?retryWrites=true&w=majority";
+// const uri = "mongodb+srv://admin:admin@boiler-calculations-db-jxkq1.mongodb.net/test?retryWrites=true&w=majority";
+const uri = "mongodb://admin:admin@boiler-calculations-db-shard-00-00-jxkq1.mongodb.net:27017,boiler-calculations-db-shard-00-01-jxkq1.mongodb.net:27017,boiler-calculations-db-shard-00-02-jxkq1.mongodb.net:27017/test?ssl=true&replicaSet=boiler-calculations-db-shard-0&authSource=admin&retryWrites=true&w=majority";
 
 
 const client = new MongoClient(uri, { useNewUrlParser: true });
