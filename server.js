@@ -67,6 +67,7 @@ app.post('/user/login', bodyParser.json(), (req, res) => {
                     isValid: true,
                     token: jwtBearerToken,
                     user: {
+                        userId: user._id,
                         name: user.name,
                         email: user.email,
                         login: user.login,
@@ -97,6 +98,7 @@ app.post('/user/verifyToken', bodyParser.json(), (req, res) => {
                 res.status(200).send({
                     tokenValid: true,
                     user: {
+                        userId: user._id,
                         name: user.name,
                         email: user.email,
                         login: user.login,
@@ -137,6 +139,7 @@ app.post('/calculations/coefficients3', bodyParser.json(), (req, res) => {
 
 app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
+    let calculationResults;
     db.collection('constants').findOne({taskNum: 1})
         .then(coefs => {
             if (!coefs) {
@@ -152,6 +155,15 @@ app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
                 const iSm = helpers.getSmData(startDiagramValues.i, endDiagramValues.i, n);
                 const tSm = helpers.getSmData(+req.body.T1, +req.body.T2, n);
                 const phiSm = helpers.getSmData(+req.body.Phi1, +req.body.Phi2, n);
+
+                calculationResults = {dSm, iSm, tSm, phiSm};
+                const user = db.collection('users').findOne({"_id" : mongo.ObjectID(req.userId)});
+                let historyObject = {
+                    user: user,
+                    calculationCoefficients: {taskNum: '1', ...req.coefs},
+                    calculationResults,
+                };
+                db.collection("history").insertOne(historyObject);
 
                 res.status(200).send({
                     dSm,
