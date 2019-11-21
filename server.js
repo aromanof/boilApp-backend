@@ -147,23 +147,27 @@ app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
                     message: 'Something went wrong, try again later',
                 });
             } else {
-                const startDiagramValues = helpers.calculateIDDiagram(+req.body.T1, +req.body.Phi1, +coefs.Pb);
-                const endDiagramValues = helpers.calculateIDDiagram(+req.body.T2, +req.body.Phi2, +coefs.Pb);
-                const n = helpers.getN(req.body.G1, req.body.G2);
+                const startDiagramValues = helpers.calculateIDDiagram(+req.body.coefs.T1, +req.body.coefs.Phi1, +coefs.Pb);
+                const endDiagramValues = helpers.calculateIDDiagram(+req.body.coefs.T2, +req.body.coefs.Phi2, +coefs.Pb);
+                const n = helpers.getN(req.body.coefs.G1, req.body.coefs.G2);
 
                 const dSm = helpers.getSmData(startDiagramValues.d, endDiagramValues.d, n);
                 const iSm = helpers.getSmData(startDiagramValues.i, endDiagramValues.i, n);
-                const tSm = helpers.getSmData(+req.body.T1, +req.body.T2, n);
-                const phiSm = helpers.getSmData(+req.body.Phi1, +req.body.Phi2, n);
+                const tSm = helpers.getSmData(+req.body.coefs.T1, +req.body.coefs.T2, n);
+                const phiSm = helpers.getSmData(+req.body.coefs.Phi1, +req.body.coefs.Phi2, n);
 
                 calculationResults = {dSm, iSm, tSm, phiSm};
-                const user = db.collection('users').findOne({"_id" : mongo.ObjectID(req.userId)});
-                let historyObject = {
-                    user: user,
-                    calculationCoefficients: {taskNum: '1', ...req.coefs},
-                    calculationResults,
-                };
-                db.collection("history").insertOne(historyObject);
+                db.collection('users').findOne({"_id" : mongo.ObjectID(req.body.userId)}).then(
+                    (user) => {
+                        let historyObject = {
+                            date: req.body.date,
+                            user: user,
+                            calculationCoefficients: {taskNum: '1', ...req.body.coefs},
+                            calculationResults,
+                        };
+                        db.collection("history").insertOne(historyObject);
+                    },
+                );
 
                 res.status(200).send({
                     dSm,
@@ -210,14 +214,26 @@ app.post('/chart/task1-temperature', bodyParser.json(), (req, res) => {
 app.post('/calculations/calculate-task3', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
     const nozzleInfo = helpers.getFinalNozzleHeight(
-        +req.body.L,
-        +req.body.I1,
-        +req.body.I2,
-        +req.body.T2_1,
-        +req.body.T2_2,
-        +req.body.d,
-        +req.body.S,
-        +req.body.V,
+        +req.body.coefs.L,
+        +req.body.coefs.I1,
+        +req.body.coefs.I2,
+        +req.body.coefs.T2_1,
+        +req.body.coefs.T2_2,
+        +req.body.coefs.d,
+        +req.body.coefs.S,
+        +req.body.coefs.V,
+    );
+
+    db.collection('users').findOne({"_id" : mongo.ObjectID(req.body.userId)}).then(
+        (user) => {
+            let historyObject = {
+                date: req.body.date,
+                user: user,
+                calculationCoefficients: {taskNum: '3', ...req.body.coefs},
+                calculationResults: nozzleInfo,
+            };
+            db.collection("history").insertOne(historyObject);
+        },
     );
 
     res.status(200).send(nozzleInfo);
@@ -316,4 +332,28 @@ app.post('/admin/update-task3', bodyParser.json(), (req, res) => {
         }
     );
     res.status(200).send();
+});
+
+app.post('/history/user-history', bodyParser.json(), (req, res) => {
+    if(!req.body) return res.sendStatus(400);
+    const currentPage = req.body.page - 1;
+    const pagesToSkip = currentPage * req.body.perPage;
+
+    let documentsCount;
+    db.collection("history").find({"user._id" : mongo.ObjectID(req.body.userId)}).count().then((count) => documentsCount = count);
+    db.collection("history").find({"user._id" : mongo.ObjectID(req.body.userId)}).skip(pagesToSkip).limit(+req.body.perPage).toArray().then((userHistory) => {
+        res.status(200).send({history: userHistory, documentsCount});
+    });
+});
+
+app.post('/history/admin-history', bodyParser.json(), (req, res) => {
+    if(!req.body) return res.sendStatus(400);
+    const currentPage = req.body.page - 1;
+    const pagesToSkip = currentPage * req.body.perPage;
+
+    let documentsCount;
+    db.collection("history").find().count().then((count) => documentsCount = count);
+    db.collection("history").find().skip(pagesToSkip).limit(+req.body.perPage).toArray().then((adminHistory) => {
+        res.status(200).send({history: adminHistory, documentsCount});
+    });
 });
