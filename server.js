@@ -84,7 +84,6 @@ app.post('/user/login', bodyParser.json(), (req, res) => {
   });
 });
 
-// todo: fix verification (id comparison)
 app.post('/user/verifyToken', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
     const userId = helpers.verifyJWT(req.body.token);
