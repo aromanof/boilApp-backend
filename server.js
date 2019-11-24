@@ -153,7 +153,7 @@ app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
                 const dSm = helpers.getSmData(startDiagramValues.d, endDiagramValues.d, n);
                 const iSm = helpers.getSmData(startDiagramValues.i, endDiagramValues.i, n);
                 const tSm = helpers.getSmData(+req.body.coefs.T1, +req.body.coefs.T2, n);
-                const phiSm = helpers.getSmData(+req.body.coefs.Phi1, +req.body.coefs.Phi2, n);
+                const phiSm = 60;
 
                 calculationResults = {dSm, iSm, tSm, phiSm};
                 db.collection('users').findOne({"_id" : mongo.ObjectID(req.body.userId)}).then(
