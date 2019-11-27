@@ -182,18 +182,18 @@ app.post('/chart/task1-temperature', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
     const n = helpers.getN(req.body.G1, req.body.G2);
     const startTemperatureList = [
-        +req.body.T1 - 20,
-        +req.body.T1 - 10,
-        +req.body.T1,
         +req.body.T1 + 10,
-        +req.body.T1 + 20
+        +req.body.T1 + 5,
+        +req.body.T1,
+        +req.body.T1,
+        +req.body.T1,
     ];
     const endTemperatureList = [
-        +req.body.T2 - 5,
+        +req.body.T2,
+        +req.body.T2,
         +req.body.T2,
         +req.body.T2 + 5,
         +req.body.T2 + 10,
-        +req.body.T2 + 15,
     ];
     const resultTemperatureList = [];
     for (let i = 0; i < startTemperatureList.length; i++) {
@@ -242,11 +242,18 @@ app.post('/calculations/calculate-task3', bodyParser.json(), (req, res) => {
 app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
     const sChangingList = [
-        +req.body.S - 20,
-        +req.body.S - 10,
-        +req.body.S,
         +req.body.S + 10,
-        +req.body.S + 20
+        +req.body.S + 5,
+        +req.body.S,
+        +req.body.S,
+        +req.body.S,
+    ];
+    const vChangingList = [
+        +req.body.V,
+        +req.body.V,
+        +req.body.V,
+        +req.body.V + 0.2,
+        +req.body.V + 0.5
     ];
     const resultNozzleHeightList = [];
     for (let i = 0; i < sChangingList.length; i++) {
@@ -258,11 +265,12 @@ app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
             +req.body.T2_2,
             +req.body.d,
             sChangingList[i],
-            +req.body.V,
-        ).nozzleHeight);
+            vChangingList[i].toFixed(2),
+        ).nozzleHeight.toFixed(2));
     }
     res.status(200).send({
         sChangingList,
+        vChangingList,
         resultNozzleHeightList,
     });
 });
