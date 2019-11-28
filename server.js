@@ -148,6 +148,7 @@ app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
             } else {
                 const startDiagramValues = helpers.calculateIDDiagram(+req.body.coefs.T1, +req.body.coefs.Phi1, +coefs.Pb);
                 const endDiagramValues = helpers.calculateIDDiagram(+req.body.coefs.T2, +req.body.coefs.Phi2, +coefs.Pb);
+                console.log(req.body.coefs.G1, req.body.coefs.G2);
                 const n = helpers.getN(req.body.coefs.G1, req.body.coefs.G2);
 
                 const dSm = helpers.getSmData(startDiagramValues.d, endDiagramValues.d, n);
@@ -180,6 +181,7 @@ app.post('/calculations/calculate-task1', bodyParser.json(), (req, res) => {
 
 app.post('/chart/task1-temperature', bodyParser.json(), (req, res) => {
     if(!req.body) return res.sendStatus(400);
+    console.log(req.body.G1, req.body.G2);
     const n = helpers.getN(req.body.G1, req.body.G2);
     const startTemperatureList = [
         +req.body.T1 + 10,
@@ -195,18 +197,52 @@ app.post('/chart/task1-temperature', bodyParser.json(), (req, res) => {
         +req.body.T2 + 5,
         +req.body.T2 + 10,
     ];
-    const resultTemperatureList = [];
+
+    const startPhiList = [
+        +req.body.Phi1 + 10,
+        +req.body.Phi1 + 5,
+        +req.body.Phi1,
+        +req.body.Phi1,
+        +req.body.Phi1,
+    ];
+    const endPhiList = [
+        +req.body.Phi2,
+        +req.body.Phi2,
+        +req.body.Phi2,
+        +req.body.Phi2 + 5,
+        +req.body.Phi2 + 10,
+    ];
+
+    const resultTemperatureListT = [];
+    const resultTemperatureListPhi = [];
+    const resultLabelsT = ['T1 + 10°C, T2', 'T1 + 5°C, T2', 'T1, T2', 'T1, T2 + 5°C', 'T1, T2 + 10°C'];
+    const resultLabelsPhi = ['Phi1 + 10%, Phi2', 'Phi1 + 5%, Phi2', 'Phi1, Phi2', 'Phi1, Phi2 + 5%', 'Phi1, Phi2 + 10%'];
     for (let i = 0; i < startTemperatureList.length; i++) {
-        resultTemperatureList.push(helpers.getSmData(
+        resultTemperatureListT.push(helpers.getSmData(
             startTemperatureList[i],
             endTemperatureList[i],
             n,
-        ));
+        ).toFixed(2));
+        resultTemperatureListPhi.push(helpers.getSmData(
+            startPhiList[i],
+            endPhiList[i],
+            n,
+        ).toFixed(2));
     }
+
     res.status(200).send({
-        startTemperatureList,
-        endTemperatureList,
-        resultTemperatureList,
+        T: {
+            startList: startTemperatureList,
+            endList: endTemperatureList,
+            resultTemperatureList: resultTemperatureListT,
+            labels: resultLabelsT,
+        },
+        Phi: {
+            startList: startPhiList,
+            endList: endPhiList,
+            resultTemperatureList: resultTemperatureListPhi,
+            labels: resultLabelsPhi,
+        }
     });
 });
 
