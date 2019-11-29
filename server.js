@@ -291,9 +291,28 @@ app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
         +req.body.V + 0.2,
         +req.body.V + 0.5
     ];
-    const resultNozzleHeightList = [];
+
+    const t1ChangingList = [
+        +req.body.T2_1 + 10,
+        +req.body.T2_1 + 5,
+        +req.body.T2_1,
+        +req.body.T2_1,
+        +req.body.T2_1,
+    ];
+
+    const t2ChangingList = [
+        +req.body.T2_2,
+        +req.body.T2_2,
+        +req.body.T2_2,
+        +req.body.T2_2 + 5,
+        +req.body.T2_2 + 10,
+    ];
+    const resultNozzleHeightListSV = [];
+    const resultNozzleHeightListT = [];
+    const resultLabelsT = ['T1 + 10°C, T2', 'T1 + 5°C, T2', 'T1, T2', 'T1, T2 + 5°C', 'T1, T2 + 10°C'];
+    const resultLabelsSV = ['S + 10, V', 'S + 5, V', 'S, V', 'S, V + 0.2', 'S, V + 0.5'];
     for (let i = 0; i < sChangingList.length; i++) {
-        resultNozzleHeightList.push(helpers.getFinalNozzleHeight(
+        resultNozzleHeightListSV.push(helpers.getFinalNozzleHeight(
             +req.body.L,
             +req.body.I1,
             +req.body.I2,
@@ -301,13 +320,33 @@ app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
             +req.body.T2_2,
             +req.body.d,
             sChangingList[i],
-            vChangingList[i].toFixed(2),
+            vChangingList[i],
+        ).nozzleHeight.toFixed(2));
+
+        resultNozzleHeightListT.push(helpers.getFinalNozzleHeight(
+            +req.body.L,
+            +req.body.I1,
+            +req.body.I2,
+            t1ChangingList[i],
+            t2ChangingList[i],
+            +req.body.d,
+            +req.body.S,
+            +req.body.V,
         ).nozzleHeight.toFixed(2));
     }
     res.status(200).send({
-        sChangingList,
-        vChangingList,
-        resultNozzleHeightList,
+        T: {
+            startList: t1ChangingList,
+            endList: t2ChangingList,
+            resultTemperatureList: resultNozzleHeightListT,
+            labels: resultLabelsT,
+        },
+        SV: {
+            startList: sChangingList,
+            endList: vChangingList,
+            resultTemperatureList: resultNozzleHeightListSV,
+            labels: resultLabelsSV,
+        },
     });
 });
 
