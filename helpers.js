@@ -86,7 +86,6 @@ exports.getWAirSpeed = (wOptimalSpeed, V) => {
 
 // wAirSpeed - скорость воздуха в свободном сечении скруббера (0.5 * оптимальную скорость)
 exports.getSkooberDiametr = (G, wAirSpeed) => {
-
     return Math.sqrt((4 * G * v) / (wAirSpeed * Math.PI * 3600));
 };
 
@@ -152,8 +151,8 @@ exports.getFinalNozzleHeight = (L, I1, I2, T2_1, T2_2, d, S, V) => {
     const nozzleHeight = exports.getNozzleHeight(skooberDiametr, nozzleVolume);
 
     return {
-        skooberDiametr,
-        nozzleVolume,
-        nozzleHeight,
+        skooberDiametr: skooberDiametr.toFixed(2),
+        nozzleVolume: nozzleVolume.toFixed(2),
+        nozzleHeight: nozzleHeight.toFixed(2),
     }
 };
