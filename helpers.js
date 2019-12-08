@@ -32,7 +32,7 @@ exports.getJWTByUserId = (userId) => {
         expiresIn: "7d",
         subject: userId,
     });
-}
+};
 
 exports.verifyJWT = (token) => {
     return jwt.verify(token, RSA_PUBLIC_KEY, function(err, decoded) {
@@ -40,13 +40,13 @@ exports.verifyJWT = (token) => {
         console.log(decoded);
         return decoded.sub;
     });
-}
+};
 
 exports.calculateIDDiagram = (t, phi, pBarometral) => {
     const pSaturated = 0.6112 * Math.exp((alphaWater * t) / (betaWater + t));
     const pPartial = (phi * pSaturated) / 100;
-    const d = (621.98 * (pPartial / (pBarometral - pPartial))) / 1000;
-    const i = 1.006 * t + d * (2501 + 1.805 * t);
+    const d = (621.98 * (pPartial / (pBarometral - pPartial)));
+    const i = 1.006 * t + (d / 1000) * (2501 + 1.805 * t);
     return {
         d, i,
     }

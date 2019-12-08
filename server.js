@@ -321,7 +321,7 @@ app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
             +req.body.d,
             sChangingList[i],
             vChangingList[i],
-        ).nozzleHeight.toFixed(2));
+        ).nozzleHeight);
 
         resultNozzleHeightListT.push(helpers.getFinalNozzleHeight(
             +req.body.L,
@@ -332,7 +332,7 @@ app.post('/chart/task3-nozzle-surface', bodyParser.json(), (req, res) => {
             +req.body.d,
             +req.body.S,
             +req.body.V,
-        ).nozzleHeight.toFixed(2));
+        ).nozzleHeight);
     }
     res.status(200).send({
         T: {
